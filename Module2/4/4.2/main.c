@@ -43,12 +43,13 @@ int main(void) {
         printf("3. Pop Exact Priority Message\n");
         printf("4. Pop Message with At Least Priority...\n");
         printf("5. Print Queue Size\n");
-        printf("6. Exit\n");
+        printf("6. Print Queue\n");
+        printf("7. Exit\n");
         printf("========================================\n");
 
-        int choice = get_int_option("Choose an option (1-6): ");
-        if (choice == 6) {
-            printf("\nExiting. Thank you for using Priority Queue!\n");
+        int choice = get_int_option("Choose an option (1-7): ");
+        if (choice == 7) {
+            printf("\nExiting.\n");
             break;
         }
 
@@ -123,6 +124,15 @@ int main(void) {
 
             case 5:
                 printf("Current Queue Size: %zu\n", pqueue_get_size(&q));
+                break;
+
+            case 6:
+                prio = get_int_option("Enter order(1: Lowest to highest, 2: Highest to lowest): ");
+                switch(prio) {
+                    case 1: pqueue_print(&q, LOW_TO_HIGH); break;
+                    case 2: pqueue_print(&q, HIGH_TO_LOW); break;
+                    default: printf("There is no that order scheme.\n"); break;
+                }
                 break;
 
             default:

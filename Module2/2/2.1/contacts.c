@@ -28,7 +28,7 @@ contacts_status_t string_set(string_t *str, const char *val) {
 
     size_t len = strlen(val);
     char *temp = realloc(str->data, len + 1);
-    if (!temp) return CONTACTS_ERR_MEM; // Если realloc не удался, старые данные в str->data не пострадали
+    if (!temp) return CONTACTS_ERR_MEM;
 
     str->data = temp;
     strcpy(str->data, val);
@@ -41,9 +41,6 @@ contacts_status_t string_copy(string_t *dest, const string_t *src) {
     if (!dest || !src) return CONTACTS_ERR_INVALID_ARG;
     return string_set(dest, src->data);
 }
-
-
-// --- Реализация вектора строк ---
 
 contacts_status_t string_vector_init(string_vector_t *vec) {
     if (!vec) return CONTACTS_ERR_INVALID_ARG;
@@ -95,7 +92,7 @@ contacts_status_t string_vector_copy(string_vector_t *dest, const string_vector_
     for (size_t i = 0; i < src->size; i++) {
         contacts_status_t status = string_vector_push(dest, src->items[i].data);
         if (status != CONTACTS_OK) {
-            string_vector_free(dest); // Чистим всё, если упали посередине
+            string_vector_free(dest);
             return status;
         }
     }
@@ -113,15 +110,12 @@ contacts_status_t string_vector_delete_at(string_vector_t *vec, size_t index) {
     if (index >= vec->size) return CONTACTS_ERR_OUT_OF_BOUNDS;
 
     string_free(&vec->items[index]);
-    // Сдвигаем элементы влево
     for (size_t i = index; i < vec->size - 1; i++) {
         vec->items[i] = vec->items[i + 1];
     }
     vec->size--;
     return CONTACTS_OK;
 }
-
-// --- Реализация вектора Ключ-Значение ---
 
 contacts_status_t kv_vector_init(key_value_vector_t *vec) {
     if (!vec) return CONTACTS_ERR_INVALID_ARG;
@@ -204,15 +198,12 @@ contacts_status_t kv_vector_delete_at(key_value_vector_t *vec, size_t index) {
 
     string_free(&vec->items[index].key);
     string_free(&vec->items[index].value);
-    // Сдвигаем элементы влево
     for (size_t i = index; i < vec->size - 1; i++) {
         vec->items[i] = vec->items[i + 1];
     }
     vec->size--;
     return CONTACTS_OK;
 }
-
-// --- Реализация записи (Контакта) ---
 
 contacts_status_t record_init(record_t *rec) {
     if (!rec) return CONTACTS_ERR_INVALID_ARG;
@@ -256,7 +247,7 @@ contacts_status_t record_copy(record_t *dest, const record_t *src) {
         (status = kv_vector_copy(&dest->socials, &src->socials)) != CONTACTS_OK ||
         (status = kv_vector_copy(&dest->messengers, &src->messengers)) != CONTACTS_OK) {
         
-        record_free(dest); // Транзакционность: очищаем всё при ошибке копирования
+        record_free(dest);
         return status;
     }
     return CONTACTS_OK;
@@ -264,13 +255,13 @@ contacts_status_t record_copy(record_t *dest, const record_t *src) {
 
 contacts_status_t record_set_first_name(record_t *rec, const char *val) {
     if (!rec) return CONTACTS_ERR_INVALID_ARG;
-    if (!val || strlen(val) == 0) return CONTACTS_ERR_REQUIRED; // Защита от пустого имени
+    if (!val || strlen(val) == 0) return CONTACTS_ERR_REQUIRED;
     return string_set(&rec->first_name, val);
 }
 
 contacts_status_t record_set_last_name(record_t *rec, const char *val) {
     if (!rec) return CONTACTS_ERR_INVALID_ARG;
-    if (!val || strlen(val) == 0) return CONTACTS_ERR_REQUIRED; // Защита от пустой фамилии
+    if (!val || strlen(val) == 0) return CONTACTS_ERR_REQUIRED;
     return string_set(&rec->last_name, val);
 }
 
@@ -284,10 +275,6 @@ contacts_status_t record_set_position(record_t *rec, const char *val) {
     return string_set(&rec->position, val);
 }
 
-
-// --- Реализация операций со списками внутри записи ---
-
-// Номера телефонов
 contacts_status_t record_add_number(record_t *rec, const char *number) {
     if (!rec) return CONTACTS_ERR_INVALID_ARG;
     return string_vector_push(&rec->numbers, number);
@@ -303,7 +290,6 @@ contacts_status_t record_delete_number_at(record_t *rec, size_t index) {
     return string_vector_delete_at(&rec->numbers, index);
 }
 
-// Адреса почты
 contacts_status_t record_add_email(record_t *rec, const char *email) {
     if (!rec) return CONTACTS_ERR_INVALID_ARG;
     return string_vector_push(&rec->emails, email);
@@ -319,7 +305,6 @@ contacts_status_t record_delete_email_at(record_t *rec, size_t index) {
     return string_vector_delete_at(&rec->emails, index);
 }
 
-// Социальные сети
 contacts_status_t record_add_social(record_t *rec, const char *social_name, const char *url) {
     if (!rec) return CONTACTS_ERR_INVALID_ARG;
     return kv_vector_push(&rec->socials, social_name, url);
@@ -335,7 +320,6 @@ contacts_status_t record_delete_social_at(record_t *rec, size_t index) {
     return kv_vector_delete_at(&rec->socials, index);
 }
 
-// Мессенджеры
 contacts_status_t record_add_messenger(record_t *rec, const char *messenger_name, const char *profile) {
     if (!rec) return CONTACTS_ERR_INVALID_ARG;
     return kv_vector_push(&rec->messengers, messenger_name, profile);
@@ -350,8 +334,6 @@ contacts_status_t record_delete_messenger_at(record_t *rec, size_t index) {
     if (!rec) return CONTACTS_ERR_INVALID_ARG;
     return kv_vector_delete_at(&rec->messengers, index);
 }
-
-// --- Реализация книги контактов ---
 
 contacts_status_t contacts_init(contacts_t *self) {
     if (!self) return CONTACTS_ERR_INVALID_ARG;
@@ -376,7 +358,6 @@ void contacts_free(contacts_t *self) {
 contacts_status_t contacts_add(contacts_t *self, const record_t *rec) {
     if (!self || !rec) return CONTACTS_ERR_INVALID_ARG;
 
-    // Валидация обязательных полей
     if (!rec->first_name.data || rec->first_name.length == 0 ||
         !rec->last_name.data || rec->last_name.length == 0) {
         return CONTACTS_ERR_REQUIRED;
@@ -418,7 +399,6 @@ contacts_status_t contacts_update_at(contacts_t *self, size_t index, const recor
         return CONTACTS_ERR_REQUIRED;
     }
 
-    // Замена должна быть безопасной: если копирование провалится, старый контакт не должен удалиться
     record_t temp;
     record_init(&temp);
     contacts_status_t status = record_copy(&temp, new_rec);
@@ -435,7 +415,6 @@ contacts_status_t contacts_delete_at(contacts_t *self, size_t index) {
 
     record_free(&self->records[index]);
 
-    // Сдвигаем элементы влево для заполнения пустоты
     for (size_t i = index; i < self->size - 1; i++) {
         self->records[i] = self->records[i + 1];
     }
@@ -445,5 +424,49 @@ contacts_status_t contacts_delete_at(contacts_t *self, size_t index) {
 
 record_t* contacts_get_mut_at(contacts_t *self, size_t index) {
     if (!self || index >= self->size) return NULL;
-    return &self->records[index]; // Возвращаем неконстантный указатель для редактирования по месту
+    return &self->records[index];
+}
+
+contacts_status_t contacts_resort_record(contacts_t *self, const record_t *rec) {
+    if (!self || !rec) return CONTACTS_ERR_INVALID_ARG;
+
+    // Ищем узел, содержащий редактируемую запись
+    contact_node_t *node = self->head;
+    while (node && &node->record != rec) {
+        node = node->next;
+    }
+
+    // Если узел не найден в списке
+    if (!node) return CONTACTS_ERR_OUT_OF_BOUNDS;
+
+    // Проверяем, нарушена ли сортировка относительно соседей
+    int needs_resort = 0;
+    if (node->prev && record_compare(&node->prev->record, &node->record) > 0) {
+        needs_resort = 1;
+    }
+    if (node->next && record_compare(&node->record, &node->next->record) > 0) {
+        needs_resort = 1;
+    }
+
+    if (needs_resort) {
+        // Временно извлекаем узел из двусвязного списка
+        if (node == self->head) {
+            self->head = node->next;
+            if (self->head) self->head->prev = NULL;
+            else self->tail = NULL;
+        } else if (node == self->tail) {
+            self->tail = node->prev;
+            if (self->tail) self->tail->next = NULL;
+            else self->head = NULL;
+        } else {
+            node->prev->next = node->next;
+            node->next->prev = node->prev;
+        }
+        self->size--;
+
+        // Вставляем узел заново в правильную (отсортированную) позицию
+        contacts_insert_node_sorted(self, node);
+    }
+
+    return CONTACTS_OK;
 }

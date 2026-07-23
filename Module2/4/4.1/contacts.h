@@ -117,6 +117,8 @@ size_t contacts_get_count(const contacts_t *self);
 contacts_status_t contacts_update_at(contacts_t *self, size_t index, const record_t *new_rec);
 contacts_status_t contacts_delete_at(contacts_t *self, size_t index);
 
+contacts_status_t contacts_resort_record(contacts_t *self, const record_t *rec);
+
 #ifdef __cplusplus
 }
 #endif

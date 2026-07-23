@@ -2,8 +2,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-/* --- Вспомогательные контейнеры строк и коллекций (без изменений) --- */
-
 contacts_status_t string_init(string_t *str) {
     if (!str) return CONTACTS_ERR_INVALID_ARG;
     str->data = NULL;
@@ -317,16 +315,12 @@ contacts_status_t record_delete_messenger_at(record_t *rec, size_t index) {
     return kv_vector_delete_at(&rec->messengers, index);
 }
 
-
-/* --- Функция лексикографического сравнения двух контактов (для сортировки) --- */
 static int record_compare(const record_t *a, const record_t *b) {
     int cmp = strcmp(a->last_name.data, b->last_name.data);
     if (cmp != 0) return cmp;
     return strcmp(a->first_name.data, b->first_name.data);
 }
 
-
-/* --- Вспомогательный метод обхода двусвязного списка с оптимизацией половины --- */
 static contact_node_t* contacts_get_node_at(const contacts_t *self, size_t index) {
     if (!self || index >= self->size) return NULL;
     
@@ -344,9 +338,6 @@ static contact_node_t* contacts_get_node_at(const contacts_t *self, size_t index
     }
     return curr;
 }
-
-
-/* --- Реализация CRUD API для двусвязного списка --- */
 
 contacts_status_t contacts_init(contacts_t *self) {
     if (!self) return CONTACTS_ERR_INVALID_ARG;
@@ -453,7 +444,6 @@ contacts_status_t contacts_update_at(contacts_t *self, size_t index, const recor
     contacts_status_t status = record_copy(&temp, new_rec);
     if (status != CONTACTS_OK) return status;
 
-    /* Извлекаем узел из текущей позиции, не освобождая память */
     if (node == self->head) {
         self->head = node->next;
         if (self->head) self->head->prev = NULL;
@@ -468,11 +458,9 @@ contacts_status_t contacts_update_at(contacts_t *self, size_t index, const recor
     }
     self->size--;
 
-    /* Заменяем старую запись на новую */
     record_free(&node->record);
     node->record = temp;
 
-    /* Вставляем заново в отсортированную позицию */
     contacts_insert_node_sorted(self, node);
     return CONTACTS_OK;
 }
@@ -498,5 +486,46 @@ contacts_status_t contacts_delete_at(contacts_t *self, size_t index) {
     record_free(&node->record);
     free(node);
     self->size--;
+    return CONTACTS_OK;
+}
+
+contacts_status_t contacts_resort_record(contacts_t *self, const record_t *rec) {
+    if (!self || !rec) return CONTACTS_ERR_INVALID_ARG;
+
+    contact_node_t *node = self->head;
+    while (node && &node->record != rec) {
+        node = node->next;
+    }
+
+    if (!node) return CONTACTS_ERR_OUT_OF_BOUNDS;
+
+    int needs_resort = 0;
+    if (node->prev && record_compare(&node->prev->record, &node->record) > 0) {
+        needs_resort = 1;
+    }
+    if (node->next && record_compare(&node->record, &node->next->record) > 0) {
+        needs_resort = 1;
+    }
+
+    if (needs_resort) {
+        // Временно извлекаем узел из двусвязного списка
+        if (node == self->head) {
+            self->head = node->next;
+            if (self->head) self->head->prev = NULL;
+            else self->tail = NULL;
+        } else if (node == self->tail) {
+            self->tail = node->prev;
+            if (self->tail) self->tail->next = NULL;
+            else self->head = NULL;
+        } else {
+            node->prev->next = node->next;
+            node->next->prev = node->prev;
+        }
+        self->size--;
+
+        // Вставляем узел заново в правильную (отсортированную) позицию
+        contacts_insert_node_sorted(self, node);
+    }
+
     return CONTACTS_OK;
 }

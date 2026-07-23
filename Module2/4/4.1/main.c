@@ -242,12 +242,22 @@ void handle_edit_contact(contacts_t *book) {
             case 1:
                 safe_get_line("Enter new First Name: ", buffer, sizeof(buffer));
                 status = record_set_first_name(rec, buffer);
-                if (status != CONTACTS_OK) printf("Error: First Name cannot be empty.\n");
+                if (status != CONTACTS_OK) {
+                    printf("Error: First Name cannot be empty.\n");
+                } else {
+                    // Проверяем и восстанавливаем сортировку после изменения имени
+                    contacts_resort_record(book, rec);
+                }
                 break;
             case 2:
                 safe_get_line("Enter new Last Name: ", buffer, sizeof(buffer));
                 status = record_set_last_name(rec, buffer);
-                if (status != CONTACTS_OK) printf("Error: Last Name cannot be empty.\n");
+                if (status != CONTACTS_OK) {
+                    printf("Error: Last Name cannot be empty.\n");
+                } else {
+                    // Проверяем и восстанавливаем сортировку после изменения фамилии
+                    contacts_resort_record(book, rec);
+                }
                 break;
             case 3:
                 safe_get_line("Enter new Workplace: ", buffer, sizeof(buffer));

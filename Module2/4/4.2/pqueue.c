@@ -1,6 +1,7 @@
 #include "pqueue.h"
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 
 pqueue_status_t pqueue_init(pqueue_t *q) {
     if (!q) return PQUEUE_ERR_INVALID_ARG;
@@ -118,6 +119,31 @@ pqueue_status_t pqueue_pop_at_least(pqueue_t *q, uint8_t threshold, char **out_t
         }
     }
     return PQUEUE_ERR_EMPTY;
+}
+
+void pqueue_print(pqueue_t* q, pqueue_print_order_t order)
+{
+    if (!q) {
+        return;
+    }
+
+    if (order == HIGH_TO_LOW) {
+        for (int i = 255; i >= 0; i--) {
+            qnode_t *curr = q->buckets[i].head;
+            while (curr) {
+                printf("[%u] %s\n", curr->priority, curr->text);
+                curr = curr->next;
+            }
+        }
+    } else if (order == LOW_TO_HIGH) {
+        for (int i = 0; i < 256; i++) {
+            qnode_t *curr = q->buckets[i].head;
+            while (curr) {
+                printf("[%u] %s\n", curr->priority, curr->text);
+                curr = curr->next;
+            }
+        }
+    }
 }
 
 size_t pqueue_get_size(const pqueue_t *q) {

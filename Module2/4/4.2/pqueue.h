@@ -15,6 +15,11 @@ typedef enum {
     PQUEUE_ERR_INVALID_ARG
 } pqueue_status_t;
 
+typedef enum {
+    HIGH_TO_LOW = 0,
+    LOW_TO_HIGH
+} pqueue_print_order_t;
+
 typedef struct qnode {
     char *text;
     uint8_t priority;
@@ -41,6 +46,8 @@ pqueue_status_t pqueue_pop_highest(pqueue_t *q, char **out_text, uint8_t *out_pr
 pqueue_status_t pqueue_pop_exact(pqueue_t *q, uint8_t priority, char **out_text);
 
 pqueue_status_t pqueue_pop_at_least(pqueue_t *q, uint8_t threshold, char **out_text, uint8_t *out_priority);
+
+void pqueue_print(pqueue_t *q, pqueue_print_order_t order);
 
 size_t pqueue_get_size(const pqueue_t *q);
 

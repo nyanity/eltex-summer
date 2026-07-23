@@ -7,8 +7,9 @@
 #include <limits.h>
 
 typedef struct {
-    void *handle;
-    calc_plugin_t *info;
+    char path[PATH_MAX]; 
+    char *name;          
+    char *symbol;        
 } loaded_plugin_t;
 
 static void safe_get_line(const char *prompt, char *buffer, size_t size) {
@@ -99,9 +100,14 @@ int main(void) {
                 capacity = new_cap;
             }
 
-            plugins[count].handle = handle;
-            plugins[count].info = info;
+            strncpy(plugins[count].path, path, sizeof(plugins[count].path) - 1);
+            plugins[count].path[sizeof(plugins[count].path) - 1] = '\0';
+            
+            plugins[count].name = strdup(info->name);
+            plugins[count].symbol = strdup(info->symbol);
             count++;
+
+            dlclose(handle);
         }
     }
     closedir(dir);
@@ -117,7 +123,7 @@ int main(void) {
         printf("         PLUGIN CALCULATOR (6.3)        \n");
         printf("========================================\n");
         for (size_t i = 0; i < count; i++) {
-            printf("%zu. %s (%s)\n", i + 1, plugins[i].info->name, plugins[i].info->symbol);
+            printf("%zu. %s (%s)\n", i + 1, plugins[i].name, plugins[i].symbol);
         }
         printf("%zu. Exit\n", count + 1);
         printf("========================================\n");
@@ -133,10 +139,35 @@ int main(void) {
             continue;
         }
 
+        size_t idx = (size_t)(choice - 1);
+
+        void *handle = dlopen(plugins[idx].path, RTLD_LAZY);
+        if (!handle) {
+            printf("\nError: Plugin file was deleted or is unavailable!\n");
+            printf("Unloading plugin '%s' from list.\n", plugins[idx].name);
+
+            free(plugins[idx].name);
+            free(plugins[idx].symbol);
+
+            for (size_t j = idx; j < count - 1; j++) {
+                plugins[j] = plugins[j + 1];
+            }
+            count--;
+            continue;
+        }
+
+        calc_plugin_t *info = (calc_plugin_t*)dlsym(handle, "plugin_info");
+        if (!info || !info->op) {
+            printf("\nError: Failed to find valid plugin info or operation pointer.\n");
+            dlclose(handle);
+            continue;
+        }
+
         int success_a = 0;
         double arg_a = get_double_input("Enter first argument (A): ", &success_a);
         if (!success_a) {
             printf("Error: Invalid numeric input for argument A.\n");
+            dlclose(handle);
             continue;
         }
 
@@ -144,11 +175,12 @@ int main(void) {
         double arg_b = get_double_input("Enter second argument (B): ", &success_b);
         if (!success_b) {
             printf("Error: Invalid numeric input for argument B.\n");
+            dlclose(handle);
             continue;
         }
 
         double result = 0.0;
-        calc_op_t operation = plugins[choice - 1].info->op;
+        calc_op_t operation = info->op;
         calc_status_t status = operation(arg_a, arg_b, &result);
 
         if (status == CALC_OK) {
@@ -158,10 +190,13 @@ int main(void) {
         } else {
             printf("\nError: Operation failed.\n");
         }
+
+        dlclose(handle);
     }
 
     for (size_t i = 0; i < count; i++) {
-        dlclose(plugins[i].handle);
+        free(plugins[i].name);
+        free(plugins[i].symbol);
     }
     free(plugins);
 

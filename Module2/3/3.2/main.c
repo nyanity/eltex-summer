@@ -39,14 +39,8 @@ int main(int argc, char *argv[]) {
 
     for (long i = 0; i < n_packets; i++) {
         ipv4_addr_t dest_ip;
+        dest_ip = generate_random_ip();
     
-        if (rand() % 100 < 30) {
-            ipv4_addr_t rand_host = generate_random_ip();
-            dest_ip.value = (gateway.value & mask.value) | (rand_host.value & ~mask.value);
-        } else {
-            dest_ip = generate_random_ip();
-        }
-
         char dest_ip_str[16];
         ip_to_string(dest_ip, dest_ip_str);
 
