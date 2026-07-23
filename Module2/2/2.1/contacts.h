@@ -98,7 +98,6 @@ contacts_status_t record_delete_messenger_at(record_t *rec, size_t index);
 contacts_status_t contacts_init(contacts_t *self);
 void contacts_free(contacts_t *self);
 
-
 contacts_status_t contacts_add(contacts_t *self, const record_t *rec);
 
 const record_t* contacts_get_at(const contacts_t *self, size_t index);

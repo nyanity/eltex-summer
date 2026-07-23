@@ -2,8 +2,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-// --- Реализация динамической строки ---
-
 contacts_status_t string_init(string_t *str) {
     if (!str) return CONTACTS_ERR_INVALID_ARG;
     str->data = NULL;
