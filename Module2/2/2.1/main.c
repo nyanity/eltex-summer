@@ -238,24 +238,16 @@ void handle_edit_contact(contacts_t *book) {
         char buffer[256];
         contacts_status_t status;
 
-switch (choice) {
+        switch (choice) {
             case 1:
                 safe_get_line("Enter new First Name: ", buffer, sizeof(buffer));
                 status = record_set_first_name(rec, buffer);
-                if (status != CONTACTS_OK) {
-                    printf("Error: First Name cannot be empty.\n");
-                } else {
-                    contacts_resort_record(book, rec);
-                }
+                if (status != CONTACTS_OK) printf("Error: First Name cannot be empty.\n");
                 break;
             case 2:
                 safe_get_line("Enter new Last Name: ", buffer, sizeof(buffer));
                 status = record_set_last_name(rec, buffer);
-                if (status != CONTACTS_OK) {
-                    printf("Error: Last Name cannot be empty.\n");
-                } else {
-                    contacts_resort_record(book, rec);
-                }
+                if (status != CONTACTS_OK) printf("Error: Last Name cannot be empty.\n");
                 break;
             case 3:
                 safe_get_line("Enter new Workplace: ", buffer, sizeof(buffer));
