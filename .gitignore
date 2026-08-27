@@ -14,8 +14,6 @@ obj/
 *.dylib
 *.dll
 
-.vscode/ipch/
-.vscode/browse.vc.db
-.vscode/config_detected_headers.json
+.vscode/
 *.suo
 *.user

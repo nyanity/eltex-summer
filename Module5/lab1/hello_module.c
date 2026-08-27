@@ -4,7 +4,7 @@
 
 MODULE_AUTHOR("Mihailov Andrey <zwzardd@gmail.com>");
 MODULE_DESCRIPTION("Hello World from kernel module.");
-MODULE_LICENSE("Proprietary/MAL");
+MODULE_LICENSE("GPL/MAL");
 
 static int __init hello_init(void)
 {
