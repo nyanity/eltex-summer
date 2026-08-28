@@ -1,5 +1,4 @@
 #!/bin/bash
-# Test script for Task 2 (Proc File Module)
 
 MODULE="proc_module"
 KO_FILE="${MODULE}.ko"

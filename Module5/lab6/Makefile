@@ -8,7 +8,7 @@ all:
 	@echo "obj-m := $(MODULE_NAME).o" > $(BUILD_DIR)/Makefile
 	$(MAKE) -C $(KDIR) M=$(BUILD_DIR) modules
 	@cp $(BUILD_DIR)/$(MODULE_NAME).ko $(PWD)/
-	@echo "Build successful! Created $(MODULE_NAME).ko in the source directory."
+	@echo "Done."
 
 clean:
 	$(MAKE) -C $(KDIR) M=$(BUILD_DIR) clean || true

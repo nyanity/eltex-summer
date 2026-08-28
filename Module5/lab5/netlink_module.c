@@ -35,7 +35,7 @@ static void nl_recv_msg(struct sk_buff *skb)
     }
 
     nlh = nlmsg_put(skb_out, 0, 0, NLMSG_DONE, msg_size, 0);
-    NETLINK_CB(skb_out).dst_group = 0; /* Unicast (not multicast) */
+    NETLINK_CB(skb_out).dst_group = 0;
     strncpy(nlmsg_data(nlh), msg, msg_size);
 
     res = nlmsg_unicast(nl_sk, skb_out, pid);

@@ -13,6 +13,7 @@ obj/
 *.lai
 *.dylib
 *.dll
+*.ko
 
 .vscode/
 *.suo

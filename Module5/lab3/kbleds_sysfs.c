@@ -39,7 +39,7 @@ static void my_timer_func(struct timer_list *t)
     if (on) {
         my_driver->ops->ioctl(my_tty, KDSETLED, led_mask);
     } else {
-        my_driver->ops->ioctl(my_tty, KDSETLED, 0); // Выключаем на фазе паузы
+        my_driver->ops->ioctl(my_tty, KDSETLED, 0);
     }
 
     if (blink_active) {

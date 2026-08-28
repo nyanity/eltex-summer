@@ -20,7 +20,7 @@ MODULE_DESCRIPTION("Netfilter.");
 MODULE_LICENSE("GPL");
 
 struct ip_node {
-    __be32 ip_addr;
+    unsigned int ip_addr;
     struct list_head list;
 };
 
@@ -208,7 +208,6 @@ static int __init filter_init(void)
         return -ENOMEM;
     }
 
-    /* Set up Netfilter Hook */
     nf_ops.hook = my_nf_hookfn;
     nf_ops.pf = NFPROTO_IPV4;
     nf_ops.hooknum = NF_INET_LOCAL_OUT;
@@ -234,7 +233,6 @@ static void __exit filter_exit(void)
 
     nf_unregister_net_hook(&init_net, &nf_ops);
 
-    /* Remove proc entry */
     remove_proc_entry(PROC_ENTRY_NAME, NULL);
 
     spin_lock_irqsave(&blacklist_lock, flags);
