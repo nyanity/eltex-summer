@@ -1,6 +1,7 @@
 #include "contacts.h"
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 
 contacts_status_t string_init(string_t *str) {
     if (!str) return CONTACTS_ERR_INVALID_ARG;
@@ -548,4 +549,37 @@ contacts_status_t contacts_delete_at(contacts_t *self, size_t index) {
     }
 
     return CONTACTS_OK;
+}
+
+static void contacts_print_tree_rec(const contact_node_t *node, const char *prefix, int is_left) {
+    if (!node) return;
+
+    if (node->right) {
+        char new_prefix[1024];
+        snprintf(new_prefix, sizeof(new_prefix), "%s%s", prefix, is_left ? "│   " : "    ");
+        contacts_print_tree_rec(node->right, new_prefix, 0);
+    }
+
+    printf("%s", prefix);
+    printf("%s", is_left ? "└── " : "┌── ");
+
+    const char *first = node->record.first_name.data ? node->record.first_name.data : "";
+    const char *last = node->record.last_name.data ? node->record.last_name.data : "";
+    printf("%s %s\n", last, first);
+
+    if (node->left) {
+        char new_prefix[1024];
+        snprintf(new_prefix, sizeof(new_prefix), "%s%s", prefix, is_left ? "    " : "│   ");
+        contacts_print_tree_rec(node->left, new_prefix, 1);
+    }
+}
+
+void contacts_print_tree(const contacts_t *self) {
+    if (!self || !self->root) {
+        printf("[Tree is empty]\n");
+        return;
+    }
+    printf("\n=== SEARCH TREE STRUCTURE ===\n");
+    contacts_print_tree_rec(self->root, "", 1);
+    printf("=============================\n");
 }

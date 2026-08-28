@@ -101,7 +101,7 @@ pqueue_status_t pqueue_pop_exact(pqueue_t *q, uint8_t priority, char **out_text)
 pqueue_status_t pqueue_pop_at_least(pqueue_t *q, uint8_t threshold, char **out_text, uint8_t *out_priority) {
     if (!q || !out_text) return PQUEUE_ERR_INVALID_ARG;
     
-    for (int i = 255; i >= threshold; i--) {
+    for (int i = threshold; i < 256; i++) {
         fifo_queue_t *bucket = &q->buckets[i];
         if (bucket->head) {
             qnode_t *node = bucket->head;

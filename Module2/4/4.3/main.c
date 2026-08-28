@@ -308,11 +308,12 @@ int main(void) {
         printf("3. Add New Contact\n");
         printf("4. Edit Existing Contact\n");
         printf("5. Delete Contact\n");
-        printf("6. Exit\n");
+        printf("6. Print Tree Structure (Graphical)\n");
+        printf("7. Exit\n");                           
         printf("========================================\n");
 
-        int choice = get_int_option("Choose an option (1-6): ");
-        if (choice == 6) {
+        int choice = get_int_option("Choose an option (1-7): ");
+        if (choice == 7) {
             printf("\nExiting.\n");
             break;
         }
@@ -332,6 +333,9 @@ int main(void) {
                 break;
             case 5:
                 handle_delete_contact(&book);
+                break;
+            case 6:
+                contacts_print_tree(&book);
                 break;
             default:
                 printf("Invalid selection. Please try again.\n");

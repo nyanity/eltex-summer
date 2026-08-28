@@ -49,23 +49,24 @@ static double get_double_input(const char *prompt, int *success) {
     return val;
 }
 
-int main(void) {
-    const char *plugin_dir = "./build/plugins";
+static void free_plugins_metadata(loaded_plugin_t *plugins, size_t count) {
+    if (plugins) {
+        for (size_t i = 0; i < count; i++) {
+            free(plugins[i].name);
+            free(plugins[i].symbol);
+            plugins[i].name = NULL;
+            plugins[i].symbol = NULL;
+        }
+    }
+}
+
+static size_t scan_plugins(const char *plugin_dir, loaded_plugin_t **plugins, size_t *capacity) {
     DIR *dir = opendir(plugin_dir);
     if (!dir) {
-        plugin_dir = "./plugins";
-        dir = opendir(plugin_dir);
+        return 0;
     }
 
-    if (!dir) {
-        fprintf(stderr, "Error: Plugins directory not found.\n");
-        return 1;
-    }
-
-    loaded_plugin_t *plugins = NULL;
-    size_t capacity = 0;
     size_t count = 0;
-
     struct dirent *entry;
     while ((entry = readdir(dir)) != NULL) {
         size_t len = strlen(entry->d_name);
@@ -88,50 +89,79 @@ int main(void) {
                 continue;
             }
 
-            if (count >= capacity) {
-                size_t new_cap = capacity == 0 ? 4 : capacity * 2;
-                loaded_plugin_t *temp = realloc(plugins, new_cap * sizeof(loaded_plugin_t));
+            if (count >= *capacity) {
+                size_t new_cap = *capacity == 0 ? 4 : *capacity * 2;
+                loaded_plugin_t *temp = realloc(*plugins, new_cap * sizeof(loaded_plugin_t));
                 if (!temp) {
                     fprintf(stderr, "Fatal error: out of memory.\n");
                     dlclose(handle);
                     break;
                 }
-                plugins = temp;
-                capacity = new_cap;
+                *plugins = temp;
+                *capacity = new_cap;
             }
 
-            strncpy(plugins[count].path, path, sizeof(plugins[count].path) - 1);
-            plugins[count].path[sizeof(plugins[count].path) - 1] = '\0';
+            strncpy((*plugins)[count].path, path, sizeof((*plugins)[count].path) - 1);
+            (*plugins)[count].path[sizeof((*plugins)[count].path) - 1] = '\0';
             
-            plugins[count].name = strdup(info->name);
-            plugins[count].symbol = strdup(info->symbol);
+            (*plugins)[count].name = strdup(info->name);
+            (*plugins)[count].symbol = strdup(info->symbol);
             count++;
 
             dlclose(handle);
         }
     }
     closedir(dir);
+    return count;
+}
 
-    if (count == 0) {
-        fprintf(stderr, "Error: No valid plugins loaded from %s.\n", plugin_dir);
-        free(plugins);
+int main(void) {
+    const char *plugin_dir = "./build/plugins";
+    DIR *dir = opendir(plugin_dir);
+    if (!dir) {
+        plugin_dir = "./plugins";
+        dir = opendir(plugin_dir);
+    }
+
+    if (!dir) {
+        fprintf(stderr, "Error: Plugins directory not found.\n");
         return 1;
     }
+    closedir(dir);
+
+    loaded_plugin_t *plugins = NULL;
+    size_t capacity = 0;
+    
+    size_t count = scan_plugins(plugin_dir, &plugins, &capacity);
 
     while (1) {
         printf("\n========================================\n");
         printf("         PLUGIN CALCULATOR (6.3)        \n");
         printf("========================================\n");
-        for (size_t i = 0; i < count; i++) {
-            printf("%zu. %s (%s)\n", i + 1, plugins[i].name, plugins[i].symbol);
+        if (count == 0) {
+            printf("[No plugins loaded]\n");
+        } else {
+            for (size_t i = 0; i < count; i++) {
+                printf("%zu. %s (%s)\n", i + 1, plugins[i].name, plugins[i].symbol);
+            }
         }
-        printf("%zu. Exit\n", count + 1);
+        printf("%zu. Refresh\n", count + 1);
+        printf("%zu. Exit\n", count + 2);
         printf("========================================\n");
 
         int choice = get_int_option("Choose an option: ");
-        if (choice == (int)(count + 1)) {
+        
+        if (choice == (int)(count + 2)) {
             printf("\nExiting.\n");
             break;
+        }
+
+        if (choice == (int)(count + 1)) {
+            printf("\nRefreshing plugins from %s...\n", plugin_dir);
+            free_plugins_metadata(plugins, count);
+            count = scan_plugins(plugin_dir, &plugins, &capacity);
+            printf("Refresh completed. Loaded %zu valid plugin(s).\n", count);
+            continue;
         }
 
         if (choice < 1 || (size_t)choice > count) {
@@ -194,10 +224,7 @@ int main(void) {
         dlclose(handle);
     }
 
-    for (size_t i = 0; i < count; i++) {
-        free(plugins[i].name);
-        free(plugins[i].symbol);
-    }
+    free_plugins_metadata(plugins, count);
     free(plugins);
 
     return 0;

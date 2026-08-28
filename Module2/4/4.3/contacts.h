@@ -107,7 +107,6 @@ contacts_status_t record_add_messenger(record_t *rec, const char *messenger_name
 contacts_status_t record_update_messenger_at(record_t *rec, size_t index, const char *new_messenger_name, const char *new_profile);
 contacts_status_t record_delete_messenger_at(record_t *rec, size_t index);
 
-/* CRUD API (Полная совместимость по именам) */
 contacts_status_t contacts_init(contacts_t *self);
 void contacts_free(contacts_t *self);
 
@@ -121,6 +120,8 @@ contacts_status_t contacts_update_at(contacts_t *self, size_t index, const recor
 contacts_status_t contacts_delete_at(contacts_t *self, size_t index);
 
 void contacts_balance(contacts_t *self);
+
+void contacts_print_tree(const contacts_t *self);
 
 #ifdef __cplusplus
 }
