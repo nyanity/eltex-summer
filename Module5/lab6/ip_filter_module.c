@@ -211,7 +211,7 @@ static int __init filter_init(void)
     /* Set up Netfilter Hook */
     nf_ops.hook = my_nf_hookfn;
     nf_ops.pf = NFPROTO_IPV4;
-    nf_ops.hooknum = NF_INET_LOCAL_OUT
+    nf_ops.hooknum = NF_INET_LOCAL_OUT;
     nf_ops.priority = NF_IP_PRI_FIRST;
 
     ret = nf_register_net_hook(&init_net, &nf_ops);
