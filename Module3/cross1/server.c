@@ -121,11 +121,7 @@ int main(int argc, char *argv[]) {
     struct timeval tv;
     tv.tv_sec = 1;
     tv.tv_usec = 0;
-#if !defined(SO_RCVTIMEO) && defined(SO_RCVTIMEO_OLD)
-    #define SO_RCVTIMEO SO_RCVTIMEO_OLD
-#elif
-    #define SO_RCVTIMEO 20
-#endif
+    //#define SO_RCVTIMEO 20
     setsockopt(sockfd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv));
 
     printf("Raw Echo Server started on port %u...\n", server_port);

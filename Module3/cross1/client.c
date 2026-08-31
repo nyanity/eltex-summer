@@ -70,9 +70,8 @@ int main(int argc, char *argv[]) {
     if (dummy_fd >= 0) {
         int opt = 1;
         setsockopt(dummy_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
-#ifdef SO_REUSEPORT
         setsockopt(dummy_fd, SOL_SOCKET, SO_REUSEPORT, &opt, sizeof(opt));
-#endif
+        
         struct sockaddr_in dummy_addr;
         memset(&dummy_addr, 0, sizeof(dummy_addr));
         dummy_addr.sin_family = AF_INET;
