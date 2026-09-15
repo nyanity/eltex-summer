@@ -25,7 +25,7 @@ static void nl_recv_msg(struct sk_buff *skb)
     nlh = (struct nlmsghdr *)skb->data;
     pr_info("netlink: Received payload: %s\n", (char *)nlmsg_data(nlh));
 
-    pid = nlh->nlmsg_pid; /* PID of sending process */
+    pid = nlh->nlmsg_pid; 
     msg_size = strlen(msg);
 
     skb_out = nlmsg_new(msg_size, GFP_KERNEL);

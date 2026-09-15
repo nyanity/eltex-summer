@@ -8,9 +8,9 @@
 #define BUFFER_SIZE 512
 #define PROC_PERMS 0666
 
-MODULE_AUTHOR("Ivan Ivanov <ivan@example.com>");
-MODULE_DESCRIPTION("Proc file exchange kernel module using proc_ops");
-MODULE_LICENSE("GPL");
+MODULE_AUTHOR("Mihailov Andrey <zwzardd@gmail.com>");
+MODULE_DESCRIPTION("Creating and interacting with proc file.");
+MODULE_LICENSE("GPL/MAL");
 
 static char proc_buffer[BUFFER_SIZE];
 static size_t proc_buffer_len = 0;
@@ -46,6 +46,7 @@ static ssize_t my_proc_write(struct file *file, const char __user *usr_buf, size
     proc_buffer[to_copy] = '\0';
     proc_buffer_len = to_copy;
 
+    // Удаляем символ переноса строки на конце, если он есть
     if (proc_buffer_len > 0 && proc_buffer[proc_buffer_len - 1] == '\n') {
         proc_buffer[proc_buffer_len - 1] = '\0';
         proc_buffer_len--;

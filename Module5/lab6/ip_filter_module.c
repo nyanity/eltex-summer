@@ -20,7 +20,7 @@ MODULE_DESCRIPTION("Netfilter.");
 MODULE_LICENSE("GPL");
 
 struct ip_node {
-    unsigned int ip_addr;
+    __be32 ip_addr;
     struct list_head list;
 };
 

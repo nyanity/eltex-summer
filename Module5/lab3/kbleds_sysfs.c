@@ -15,7 +15,7 @@
 
 MODULE_AUTHOR("Mihailov Andrey <zwzardd@gmail.com>");
 MODULE_DESCRIPTION("Creating interface via sysfs for ioctl led beep.");
-MODULE_LICENSE("Proprietary/MAL");
+MODULE_LICENSE("GPL/MAL");
 
 static struct timer_list my_timer;
 static struct tty_driver *my_driver;
@@ -39,7 +39,7 @@ static void my_timer_func(struct timer_list *t)
     if (on) {
         my_driver->ops->ioctl(my_tty, KDSETLED, led_mask);
     } else {
-        my_driver->ops->ioctl(my_tty, KDSETLED, 0);
+        my_driver->ops->ioctl(my_tty, KDSETLED, 0); // Выключаем на фазе паузы
     }
 
     if (blink_active) {
